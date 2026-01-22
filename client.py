@@ -1,12 +1,8 @@
 import logging
-import os
-import sys
 import threading
-import time
 
 import requests
-
-from led.constants import GREEN, RED, WHITE
+from led.constants import COLOR_GREEN, COLOR_RED, COLOR_WHITE
 from led.controller import LEDController
 
 logging.basicConfig(level=logging.INFO)
@@ -27,14 +23,14 @@ def send_scan(url: str, qr_data: str, led_controller: LEDController):
                     logging.info(
                         f"✅ QR gültig: {qr_data} – Profile: {data.get('profile')}"
                     )
-                    led_controller.update_color(GREEN)
-                    led_controller.set_timeout(9, WHITE)
+                    led_controller.update_color(COLOR_GREEN)
+                    led_controller.set_timeout(9, COLOR_WHITE)
                 else:
                     logging.warning(
                         f"❌ QR ungültig: {qr_data} – Message: {data.get('message')}"
                     )
-                    led_controller.update_color(RED)
-                    led_controller.set_timeout(9, WHITE)
+                    led_controller.update_color(COLOR_RED)
+                    led_controller.set_timeout(9, COLOR_WHITE)
 
             else:
                 logging.error(f"❌ POST {response.status_code}: {qr_data}")

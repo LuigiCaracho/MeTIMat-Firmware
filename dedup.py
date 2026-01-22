@@ -1,3 +1,7 @@
+"""
+Class to deduplicate URLs
+"""
+
 import time
 
 

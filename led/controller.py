@@ -4,7 +4,10 @@ from typing import Any, List
 
 from rpi_ws281x import RGBW, Color, PixelStrip
 
-from .constants import LED_COUNT, LOGO_BLUE, LOGO_TURQUOISE, STRIP_PARAMETERS
+from .constants import (
+    LED_COUNT,
+    STRIP_PARAMETERS,
+)
 
 
 class LEDController(Thread):

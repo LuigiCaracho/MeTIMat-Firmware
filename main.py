@@ -1,5 +1,9 @@
-import cv2
+#!/usr/bin/env python3
+"""
+Main script for client firmware
+"""
 
+import cv2
 from client import send_scan
 from config import API_URL, CAMERA_ID, DUPLICATE_TIMEOUT
 from dedup import Deduplicator

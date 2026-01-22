@@ -1,14 +1,12 @@
 from rpi_ws281x import Color, ws
 
 # Farben erstellen
-RED = Color(255, 0, 0)
-GREEN = Color(0, 255, 0)
-BLUE = Color(0, 0, 255)
-LOGO_BLUE = Color(0, 102, 204)  # #0066cc
-LOGO_TURQUOISE = Color(0, 168, 168)  # #00a8a8
-WHITE = Color(255, 255, 255)  # #ffffff
-
-COLORS = [LOGO_BLUE, LOGO_TURQUOISE, WHITE]
+COLOR_RED = Color(255, 0, 0)
+COLOR_GREEN = Color(0, 255, 0)
+COLOR_BLUE = Color(0, 0, 255)
+COLOR_LOGO_BLUE = Color(0, 102, 204)  # #0066cc
+COLOR_LOGO_TURQUOISE = Color(0, 168, 168)  # #00a8a8
+COLOR_WHITE = Color(255, 255, 255)  # #ffffff
 
 # Strip Settings
 LED_COUNT = 15

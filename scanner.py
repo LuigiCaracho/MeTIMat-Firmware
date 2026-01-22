@@ -1,3 +1,7 @@
+"""
+Module to scan from a camera
+"""
+
 import cv2
 
 

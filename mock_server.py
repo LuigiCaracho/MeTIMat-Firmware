@@ -1,5 +1,5 @@
+from config import API_LISTEN_HOST, API_PORT, API_URL
 from flask import Flask, jsonify, request
-from flask.typing import ResponseClass
 
 app = Flask(__name__)
 
@@ -18,5 +18,5 @@ def scan():
 
 
 if __name__ == "__main__":
-    print("🟢 API Server läuft auf http://127.0.0.1:5000")
-    app.run(port=5000)
+    print(f"API Server läuft auf {API_URL}")
+    app.run(port=API_PORT, host=API_LISTEN_HOST)

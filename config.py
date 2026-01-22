@@ -1,3 +1,8 @@
-API_URL = "http://127.0.0.1:5000/api/scan"
+API_HOST = "127.0.0.1"
+API_LISTEN_HOST = "0.0.0.0"
+API_PORT = 5000
+API_PATH = "/api/scan"
+
+API_URL = f"http://{API_HOST}:{API_PORT}/{API_PATH.strip('/')}"
 DUPLICATE_TIMEOUT = 5  # Sekunden
 CAMERA_ID = 0
