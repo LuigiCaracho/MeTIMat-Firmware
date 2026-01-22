@@ -14,6 +14,7 @@ class LEDController(Thread):
     def __init__(self, params: List[Any] = STRIP_PARAMETERS) -> None:
         super().__init__()
         self.strip = PixelStrip(*params)
+        self.strip.begin()
         self.color = Color(0, 0, 0)
 
     def __set_all(self, color: RGBW) -> None:
