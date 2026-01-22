@@ -1,10 +1,10 @@
-from threading import Thread
 import time
+from threading import Thread
 from typing import Any, List
 
-from rpi_ws281x import Color, PixelStrip, RGBW
+from rpi_ws281x import RGBW, Color, PixelStrip
 
-from .constants import LED_COUNT, STRIP_PARAMETERS, LOGO_BLUE, LOGO_TURQUOISE
+from .constants import LED_COUNT, LOGO_BLUE, LOGO_TURQUOISE, STRIP_PARAMETERS
 
 
 class LEDController(Thread):
@@ -14,7 +14,7 @@ class LEDController(Thread):
     def __init__(self, params: List[Any] = STRIP_PARAMETERS) -> None:
         super().__init__()
         self.strip = PixelStrip(*params)
-        self.color = Color(0,0,0)
+        self.color = Color(0, 0, 0)
 
     def __set_all(self, color: RGBW) -> None:
         for i in range(LED_COUNT):
@@ -28,11 +28,11 @@ class LEDController(Thread):
 
         self.strip.show()
 
-    def update_color(self, color: RGBW)
+    def update_color(self, color: RGBW):
         self.color = color
 
     def run(self):
-        last_color = Color(0,0,0)
+        last_color = Color(0, 0, 0)
 
         while True:
             while self.color == last_color:
