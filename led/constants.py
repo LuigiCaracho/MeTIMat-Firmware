@@ -1,0 +1,30 @@
+from rpi_ws281x import Color, ws
+
+# Farben erstellen
+RED = Color(255, 0, 0)
+GREEN = Color(0, 255, 0)
+BLUE = Color(0, 0, 255)
+LOGO_BLUE = Color(0, 102, 204)  # #0066cc
+LOGO_TURQUOISE = Color(0, 168, 168)  # #00a8a8
+WHITE = Color(255, 255, 255)  # #ffffff
+
+COLORS = [LOGO_BLUE, LOGO_TURQUOISE, WHITE]
+
+# Strip Settings
+LED_COUNT = 15
+LED_GPIO_PIN = 18
+LED_FREQ = 800000
+LED_DMA = 10
+LED_INVERT = False
+LED_BRIGHTNESS = 255
+LED_TYPE = ws.WS2811_STRIP_GBR
+
+STRIP_PARAMETERS = [
+    LED_COUNT,
+    LED_GPIO_PIN,
+    LED_FREQ,
+    LED_DMA,
+    LED_INVERT,
+    LED_BRIGHTNESS,
+    LED_TYPE,
+]
