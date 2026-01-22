@@ -4,3 +4,6 @@ requests
 pyzbar
 rpi_ws281x
 flask
+pydantic
+fastapi
+uvicorn
