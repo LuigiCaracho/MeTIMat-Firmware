@@ -40,6 +40,7 @@ class LEDController(Thread):
 
         while True:
             if self.waiting and time.time() - self.timeout > 0:
+                print("Timeout triggered")
                 self.update_color(self.target_color)
                 self.waiting = False
 
