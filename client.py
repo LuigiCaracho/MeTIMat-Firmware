@@ -9,6 +9,34 @@ from led.controller import LEDController
 logging.basicConfig(level=logging.INFO)
 
 
+def complete_order(url: str, order_id: int):
+    """
+    Sends a request to mark the order as completed after dispensing.
+    """
+    # Assuming url is .../api/v1/orders/validate-qr
+    # We transform it to .../api/v1/orders/{order_id}/complete
+    base_url = url.rsplit("/", 1)[0]
+    complete_url = f"{base_url}/{order_id}/complete"
+
+    headers = {
+        "X-Machine-Token": MACHINE_ACCESS_TOKEN,
+        "Content-Type": "application/json",
+    }
+
+    try:
+        logging.info(f"📤 Completing order #{order_id}...")
+        response = requests.post(complete_url, headers=headers, timeout=5)
+
+        if response.status_code == 200:
+            logging.info(f"✅ Order #{order_id} successfully marked as completed.")
+        else:
+            logging.error(
+                f"❌ Failed to complete order #{order_id}: {response.status_code}"
+            )
+    except Exception as e:
+        logging.error(f"❌ Completion request failed: {e}")
+
+
 def send_scan(url: str, qr_data: str, led_controller: LEDController):
     """
     Sends QR data to the validate-qr endpoint with machine authentication.
@@ -46,6 +74,13 @@ def send_scan(url: str, qr_data: str, led_controller: LEDController):
                     logging.info(f"📦 Items to dispense: {', '.join(med_names)}")
 
                     led_controller.update_color(COLOR_GREEN)
+
+                    # Simulate dispensing logic
+                    logging.info("⚙️ Dispensing medication...")
+
+                    # Call the completion endpoint
+                    complete_order(url, order_id)
+
                     led_controller.set_timeout(9, COLOR_WHITE)
                 else:
                     message = data.get("message", "Unknown error")
