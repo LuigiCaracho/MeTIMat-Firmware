@@ -1,19 +1,21 @@
 import cv2
 
+from client import send_scan
 from config import API_URL, CAMERA_ID, DUPLICATE_TIMEOUT
 from dedup import Deduplicator
+from led.controller import LEDController
 from scanner import scan_camera
-from sender import send_scan
 
 
 def main():
     dedup = Deduplicator(DUPLICATE_TIMEOUT)
+    controller = LEDController()
 
     for data, frame in scan_camera(CAMERA_ID):
         if data:
             if dedup.is_new(data):
                 print(f"📦 Neuer Scan: {data}")
-                send_scan(API_URL, data)
+                send_scan(API_URL, data, controller)
 
         cv2.imshow("QR Scanner", frame)
         if cv2.waitKey(1) & 0xFF == 27:
