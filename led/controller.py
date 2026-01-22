@@ -44,8 +44,7 @@ class LEDController(Thread):
                 self.update_color(self.target_color)
                 self.waiting = False
 
-            while self.color == last_color:
-                time.sleep(1)
+            time.sleep(0.1)
 
             self.__set_all(self.color)
             last_color = self.color
