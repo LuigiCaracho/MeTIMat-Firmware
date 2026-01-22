@@ -10,6 +10,7 @@ from scanner import scan_camera
 def main():
     dedup = Deduplicator(DUPLICATE_TIMEOUT)
     controller = LEDController()
+    controller.start()
 
     for data, frame in scan_camera(CAMERA_ID):
         if data:
