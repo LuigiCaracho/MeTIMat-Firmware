@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask.typing import ResponseClass
 
 app = Flask(__name__)
 
@@ -7,7 +8,13 @@ app = Flask(__name__)
 def scan():
     data = request.json
     print(f"📥 POST erhalten: {data}")
-    return jsonify({"status": "ok"})
+    response = {
+        "valid": True,
+        "message": "QR-Code erfolgreich validiert",
+        "profile": "Testprofil",
+        "error": None,
+    }
+    return jsonify(response)
 
 
 if __name__ == "__main__":
