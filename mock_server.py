@@ -5,6 +5,7 @@ import uvicorn
 from config import API_LISTEN_HOST, API_PORT, API_URL, MACHINE_ACCESS_TOKEN
 from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel
+from schemas.location import Location
 
 # Import schemas
 # Assuming running from machine-firmware directory
@@ -22,6 +23,7 @@ class ValidationResponse(BaseModel):
     valid: bool
     order: Optional[Order] = None
     message: str
+    location_id: Optional[int] = None
 
 
 @app.post("/api/v1/orders/validate-qr", response_model=ValidationResponse)
@@ -46,7 +48,7 @@ async def validate_qr(
 
     # Create mock order details
     mock_order = Order(
-        id=1,
+        id=7,
         user_id=1,
         status="available for pickup",
         created_at=datetime.now(),
@@ -54,7 +56,7 @@ async def validate_qr(
         prescriptions=[
             Prescription(
                 id=101,
-                order_id=1,
+                order_id=7,
                 medication_id=50,
                 medication_name="Ibuprofen 400mg Lysinat",
                 pzn="04126127",
@@ -63,7 +65,7 @@ async def validate_qr(
             ),
             Prescription(
                 id=102,
-                order_id=1,
+                order_id=7,
                 medication_id=62,
                 medication_name="Naspray AL 0,1%",
                 pzn="03417124",
@@ -71,14 +73,24 @@ async def validate_qr(
                 updated_at=datetime.now(),
             ),
         ],
+        location=Location(
+            id=42,
+            name="MeTIMat Automat - Campus Nord",
+            address="Kaiserstraße 12, 76131 Karlsruhe",
+            latitude=49.00937,
+            longitude=8.41165,
+            is_available=True,
+        ),
     )
 
-    # Add frontend compatibility fields if necessary via dict conversion or specific model
     # Note: The Order schema in schemas/order.py might not have locationReference,
     # but the frontend expects it. We can handle this by returning a dict or extending.
 
     return ValidationResponse(
-        valid=True, order=mock_order, message="QR-Code erfolgreich validiert"
+        valid=True,
+        order=mock_order,
+        message="QR-Code erfolgreich validiert",
+        location_id=42,
     )
 
 
