@@ -11,7 +11,7 @@ class LEDController(Thread):
     strip: PixelStrip
     color: RGBW
     target_color: RGBW
-    timeout: float
+    timeout: float = 0
     waiting: float = False
 
     def __init__(self, params: List[Any] = STRIP_PARAMETERS) -> None:
@@ -39,7 +39,7 @@ class LEDController(Thread):
         last_color = Color(0, 0, 0)
 
         while True:
-            if time.time() - self.timeout > 0 and self.waiting:
+            if self.waiting and time.time() - self.timeout > 0:
                 self.update_color(self.target_color)
                 self.waiting = False
 
