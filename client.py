@@ -28,7 +28,6 @@ def send_scan(url: str, qr_data: str, led_controller: LEDController):
                         f"✅ QR gültig: {qr_data} – Profile: {data.get('profile')}"
                     )
                     led_controller.update_color(GREEN)
-
                     led_controller.set_timeout(9, WHITE)
                 else:
                     logging.warning(

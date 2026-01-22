@@ -50,6 +50,8 @@ class LEDController(Thread):
             last_color = self.color
 
     def set_timeout(self, timeout: float, color: RGBW):
+        print(f"Setting timeout for {timeout} seconds")
+
         self.timeout = time.time() + timeout
         self.waiting = True
         self.target_color = color
