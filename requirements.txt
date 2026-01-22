@@ -7,3 +7,4 @@ flask
 pydantic
 fastapi
 uvicorn
+dotenv
