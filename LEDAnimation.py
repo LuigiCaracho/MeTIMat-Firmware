@@ -1,6 +1,6 @@
 import time
 
-from rpi_ws281x import Color, PixelStrip
+from rpi_ws281x import Color, PixelStrip, ws
 
 # PixelStrip initialisieren (wie vorher)
 STRIP = PixelStrip(15, 18, 800000, 10, False, 255, 0, ws.WS281_STRIP_GBR)
@@ -14,4 +14,3 @@ while True:
             STRIP.setPixelColor(i, color)
         STRIP.show()
         time.sleep(1)
-s

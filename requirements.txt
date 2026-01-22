@@ -2,3 +2,4 @@ opencv-python
 rpi-ws281x
 requests
 pyzbar
+rpi_ws281x
