@@ -16,15 +16,21 @@ def main():
     controller = LEDController()
     controller.start()
 
-    for data, frame in scan_camera(CAMERA_ID):
-        if data:
-            if dedup.is_new(data):
-                print(f"📦 Neuer Scan: {data}")
-                send_scan(API_URL, data, controller)
+    while True:
+        try:
+            for data, frame in scan_camera(CAMERA_ID):
+                if data:
+                    if dedup.is_new(data):
+                        print(f"📦 Neuer Scan: {data}")
+                        send_scan(API_URL, data, controller)
 
-        cv2.imshow("QR Scanner", frame)
-        if cv2.waitKey(1) & 0xFF == 27:
+                cv2.imshow("QR Scanner", frame)
+                if cv2.waitKey(1) & 0xFF == 27:
+                    break
+        except KeyboardInterrupt:
             break
+        except Exception as _:
+            pass
 
     cv2.destroyAllWindows()
 
