@@ -26,6 +26,7 @@ def play_beep():
     """
     Plays the scan sound.
     """
+    logging.info(f"🔊 Attempting to play beep sound from: {SOUND_PATH}")
     if not HAS_PYGAME:
         logging.warning("⚠️ pygame not installed, cannot play sound.")
         return
@@ -35,10 +36,16 @@ def play_beep():
         return
 
     try:
+        if not pygame.mixer.get_init():
+            logging.info("🔊 Initializing pygame mixer...")
+            pygame.mixer.init()
+
         sound = pygame.mixer.Sound(SOUND_PATH)
+        logging.info(f"🔊 Sound loaded (length: {sound.get_length()}s). Playing...")
         sound.play()
+        logging.info("🔊 play() called successfully.")
     except Exception as e:
-        logging.error(f"❌ Failed to play sound: {e}")
+        logging.error(f"❌ Failed to play sound: {e}", exc_info=True)
 
 
 def complete_order(url: str, order_id: int):
@@ -74,6 +81,7 @@ def send_scan(url: str, qr_data: str, led_controller: LEDController):
     """
 
     def post():
+        logging.info(f"🔍 send_scan called for data: {qr_data}")
         play_beep()
 
         payload = {"qr_data": qr_data}
