@@ -100,6 +100,8 @@ def send_scan(url: str, qr_data: str, led_controller: LEDController):
                     logging.info(f"✅ QR valid! Order #{order_id} confirmed.")
                     logging.info(f"📦 Items to dispense: {', '.join(med_names)}")
 
+                    logging.info(data)
+
                     # Successful scan: Green LED and Success GUI
                     led_controller.set_color(COLOR_GREEN, timeout=3.0)
                     gui_signals.show_success.emit(order)

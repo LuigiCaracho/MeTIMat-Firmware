@@ -159,22 +159,17 @@ class MachineGUI(QMainWindow):
         self.close_btn.clicked.connect(self.close)
         self.close_btn.raise_()
 
-        # Camera Overlay (Portrait 3:4 aspect, moved closer to edges)
-        # 180w x 240h for a clean look
+        # Camera Overlay (Portrait 3:4 aspect, minimalist)
+        # No border and no rounding as requested
         self.camera_container = QFrame(self.central_widget)
         self.camera_container.setGeometry(1080, 460, 180, 240)
-        self.camera_container.setStyleSheet(f"""
-            QFrame {{
-                border: 1px solid rgba(20, 184, 166, 0.5);
-                background-color: black;
-                border-radius: 8px;
-            }}
-        """)
+        self.camera_container.setStyleSheet("background-color: black; border: none;")
+
         cam_layout = QVBoxLayout(self.camera_container)
-        cam_layout.setContentsMargins(1, 1, 1, 1)
+        cam_layout.setContentsMargins(0, 0, 0, 0)
         self.camera_label = QLabel()
         self.camera_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.camera_label.setStyleSheet("border-radius: 7px; background: black;")
+        self.camera_label.setStyleSheet("background: black; border: none;")
         cam_layout.addWidget(self.camera_label)
         self.camera_container.raise_()
 
@@ -265,8 +260,6 @@ class MachineGUI(QMainWindow):
         self.signals.update_frame.connect(self.set_camera_frame)
 
     def set_camera_frame(self, image):
-        # Resize to portrait 3:4 if camera is rotated or crop
-        # Here we just scale to fit the 180x240 label
         self.camera_label.setPixmap(
             QPixmap.fromImage(image).scaled(
                 self.camera_label.size(),
@@ -279,21 +272,18 @@ class MachineGUI(QMainWindow):
         self.stack.setCurrentIndex(0)
 
     def display_success(self, order):
-        # Explicit data binding fix
+        # Data binding for medication list
         prescriptions = order.get("prescriptions", [])
         if not prescriptions:
-            # Check for generic list structure in case order is a list
             if isinstance(order, list):
                 prescriptions = order
             else:
-                # Fallback to items if prescriptions is empty
                 prescriptions = order.get("items", [])
 
         self.med_table.setRowCount(0)
         self.med_table.setRowCount(len(prescriptions))
 
         for i, p in enumerate(prescriptions):
-            # Key mapping for medication names
             name = (
                 p.get("medication_name")
                 or p.get("name")
@@ -307,7 +297,6 @@ class MachineGUI(QMainWindow):
             item_name.setForeground(QColor(TEXT_COLOR))
             item_dosage.setForeground(QColor(TEXT_COLOR))
 
-            # Set alignment for cells
             item_name.setTextAlignment(
                 Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
             )
