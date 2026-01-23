@@ -103,7 +103,7 @@ def send_scan(url: str, qr_data: str, led_controller: LEDController):
                     logging.info(data)
 
                     # Successful scan: Green LED and Success GUI
-                    led_controller.set_color(COLOR_GREEN, timeout=3.0)
+                    led_controller.set_color(COLOR_GREEN, timeout=10.0)
                     gui_signals.show_success.emit(order)
 
                     # Simulate dispensing logic
@@ -113,7 +113,7 @@ def send_scan(url: str, qr_data: str, led_controller: LEDController):
                     # Invalid code: Red LED and Error GUI
                     message = data.get("message", "Ungültiger Code")
                     logging.warning(f"❌ QR invalid: {qr_data} – {message}")
-                    led_controller.set_color(COLOR_RED, timeout=3.0)
+                    led_controller.set_color(COLOR_RED, timeout=10.0)
                     gui_signals.show_error.emit(message)
 
             elif response.status_code == 401:
