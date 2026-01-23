@@ -19,7 +19,7 @@ except ImportError:
 
 logging.basicConfig(level=logging.INFO)
 
-SOUND_PATH = "assets/sounds/beep.mp3"
+SOUND_PATH = os.path.join(os.path.dirname(__file__), "assets/sounds/beep.mp3")
 
 
 def play_beep():
@@ -35,8 +35,8 @@ def play_beep():
         return
 
     try:
-        pygame.mixer.music.load(SOUND_PATH)
-        pygame.mixer.music.play()
+        sound = pygame.mixer.Sound(SOUND_PATH)
+        sound.play()
     except Exception as e:
         logging.error(f"❌ Failed to play sound: {e}")
 
