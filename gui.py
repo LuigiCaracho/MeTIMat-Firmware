@@ -90,7 +90,7 @@ class MachineGUI(QMainWindow):
         """)
         self.close_btn.clicked.connect(self.close)
 
-        # Camera Overlay (Smaller, portrait 3:4 aspect, bottom right corner)
+        # Camera Overlay (Smaller, portrait 3:4 aspect, bottom left corner)
         self.camera_container = QFrame(self.central_widget)
         self.camera_container.setStyleSheet("background-color: black; border: none;")
         cam_layout = QVBoxLayout(self.camera_container)
@@ -115,10 +115,10 @@ class MachineGUI(QMainWindow):
         self.logo_widget.setGeometry(30, 30, 80, 80)
         self.close_btn.setGeometry(w - 90, 30, 60, 60)
 
-        # Reposition Camera to absolute bottom-right corner, slightly smaller
+        # Reposition Camera to absolute bottom-left corner, slightly smaller
         # 150x200 portrait, no margin to corner
         cam_w, cam_h = 150, 200
-        self.camera_container.setGeometry(w - cam_w, h - cam_h, cam_w, cam_h)
+        self.camera_container.setGeometry(0, h - cam_h, cam_w, cam_h)
 
         # Ensure Z-Order
         self.waves.lower()
