@@ -1,20 +1,26 @@
 #!/usr/bin/env python3
 """
-Main script for client firmware
+Main script for client firmware integrating LED control, QR scanning, and GUI.
 """
+
+import sys
+import threading
 
 import cv2
 from client import send_scan
 from config import API_URL, CAMERA_ID, DUPLICATE_TIMEOUT
 from dedup import Deduplicator
+from gui import MachineGUI, gui_signals
 from led.controller import LEDController
+from PyQt6.QtWidgets import QApplication
 from scanner import scan_camera
 
 
-def main():
+def scanner_worker(led_controller):
+    """
+    Background worker for QR code scanning.
+    """
     dedup = Deduplicator(DUPLICATE_TIMEOUT)
-    controller = LEDController()
-    controller.start()
 
     while True:
         try:
@@ -22,17 +28,35 @@ def main():
                 if data:
                     if dedup.is_new(data):
                         print(f"📦 Neuer Scan: {data}")
-                        send_scan(API_URL, data, controller)
+                        send_scan(API_URL, data, led_controller)
 
-                cv2.imshow("QR Scanner", frame)
-                if cv2.waitKey(1) & 0xFF == 27:
-                    break
-        except KeyboardInterrupt:
-            break
-        except Exception as _:
-            pass
+                # Opencv window for debugging (optional in headless mode)
+                # cv2.imshow("QR Scanner", frame)
+                # if cv2.waitKey(1) & 0xFF == 27:
+                #     break
+        except Exception as e:
+            print(f"Scanner Error: {e}")
+            continue
 
-    cv2.destroyAllWindows()
+
+def main():
+    # 1. Initialize LED Controller
+    controller = LEDController()
+    controller.start()
+    controller.set_idle()
+
+    # 2. Start Scanner Thread
+    scan_thread = threading.Thread(
+        target=scanner_worker, args=(controller,), daemon=True
+    )
+    scan_thread.start()
+
+    # 3. Launch GUI (Main Thread)
+    app = QApplication(sys.argv)
+    window = MachineGUI(gui_signals)
+
+    # Run the application
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

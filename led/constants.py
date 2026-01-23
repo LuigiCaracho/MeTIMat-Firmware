@@ -4,6 +4,7 @@ from rpi_ws281x import Color, ws
 COLOR_RED = Color(255, 0, 0)
 COLOR_GREEN = Color(0, 255, 0)
 COLOR_BLUE = Color(0, 0, 255)
+COLOR_YELLOW = Color(255, 255, 0)
 COLOR_LOGO_BLUE = Color(0, 102, 204)  # #0066cc
 COLOR_LOGO_TURQUOISE = Color(0, 168, 168)  # #00a8a8
 COLOR_WHITE = Color(255, 255, 255)  # #ffffff
