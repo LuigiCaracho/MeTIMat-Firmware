@@ -2,7 +2,7 @@ import math
 import os
 import sys
 
-from PyQt6.QtCore import QObject, QPointF, Qt, QTimer, pyqtSignal
+from PyQt6.QtCore import QObject, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import (
     QColor,
     QFont,
@@ -53,7 +53,7 @@ class WaveWidget(QWidget):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_animation)
         self.timer.start(30)
-        self.setFixedHeight(180)
+        self.setFixedHeight(140)
 
     def update_animation(self):
         self.phase += 0.05
@@ -62,24 +62,21 @@ class WaveWidget(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
         width = self.width()
         height = self.height()
 
         # Draw background waves
-        # Back wave
         self._draw_wave(
-            painter, width, height, self.phase, QColor(20, 184, 166, 60), 1.0, 30
+            painter, width, height, self.phase, QColor(20, 184, 166, 60), 1.0, 25
         )
-        # Front wave
         self._draw_wave(
             painter,
             width,
             height,
             self.phase + math.pi * 0.5,
-            QColor(20, 184, 166, 120),
+            QColor(20, 184, 166, 110),
             0.7,
-            25,
+            20,
         )
 
     def _draw_wave(self, painter, w, h, phase, color, frequency, amplitude):
@@ -102,19 +99,17 @@ class MachineGUI(QMainWindow):
         self.connect_signals()
 
     def init_ui(self):
-        # Window Setup
-        self.setWindowTitle("MeTIMat Machine Interface")
+        # Window Setup (720p 16:9)
         self.setFixedSize(1280, 720)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setStyleSheet(
             f"background-color: {BG_COLOR}; color: {TEXT_COLOR}; border: none;"
         )
 
-        # Main Container
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
-        # Background Layer: Stack + Waves
+        # Main Layout (Stack + Waves)
         self.main_layout = QVBoxLayout(self.central_widget)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
@@ -126,10 +121,10 @@ class MachineGUI(QMainWindow):
         self.waves = WaveWidget()
         self.main_layout.addWidget(self.waves)
 
-        # Foreground Overlays (Logo, Close, Camera)
+        # Overlays
         self._setup_overlays()
 
-        # Initialize Pages
+        # Pages
         self.stack.addWidget(self._create_idle_page())
         self.stack.addWidget(self._create_success_page())
         self.stack.addWidget(self._create_error_page())
@@ -137,54 +132,49 @@ class MachineGUI(QMainWindow):
         self.show()
 
     def _setup_overlays(self):
-        # Logo (Top Left, Square 80x80)
+        # Logo (Top Left)
         logo_path = os.path.join(os.path.dirname(__file__), "assets/images/logo.svg")
+        self.logo_container = QWidget(self.central_widget)
+        self.logo_container.setGeometry(20, 20, 80, 80)
         if os.path.exists(logo_path):
-            self.logo_widget = QSvgWidget(logo_path, self.central_widget)
-            self.logo_widget.setGeometry(40, 40, 80, 80)
+            self.logo_svg = QSvgWidget(logo_path, self.logo_container)
+            self.logo_svg.setGeometry(0, 0, 80, 80)
         else:
-            self.logo_placeholder = QLabel("M", self.central_widget)
-            self.logo_placeholder.setGeometry(40, 40, 80, 80)
+            self.logo_placeholder = QLabel("M", self.logo_container)
+            self.logo_placeholder.setGeometry(0, 0, 80, 80)
             self.logo_placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.logo_placeholder.setFont(QFont("Roboto", 32, QFont.Weight.Bold))
             self.logo_placeholder.setStyleSheet(
-                f"background-color: {ACCENT_COLOR}; border-radius: 12px; color: white;"
+                f"background: {ACCENT_COLOR}; border-radius: 12px; font-weight: bold;"
             )
 
         # Close Button (Top Right)
         self.close_btn = QPushButton("✕", self.central_widget)
-        self.close_btn.setGeometry(1180, 30, 70, 70)
-        self.close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.close_btn.setGeometry(1210, 10, 60, 60)
         self.close_btn.setStyleSheet(f"""
             QPushButton {{
-                background-color: transparent;
-                color: rgba(248, 250, 252, 0.4);
-                font-size: 36px;
-                border-radius: 35px;
+                background: transparent; color: rgba(248, 250, 252, 0.3); font-size: 32px; border-radius: 30px;
             }}
-            QPushButton:pressed {{
-                background-color: rgba(255, 255, 255, 0.1);
-            }}
+            QPushButton:pressed {{ background: rgba(255, 255, 255, 0.1); color: white; }}
         """)
         self.close_btn.clicked.connect(self.close)
         self.close_btn.raise_()
 
-        # Camera Overlay Container (Bottom Right)
+        # Camera Overlay (Portrait 3:4 aspect, moved closer to edges)
+        # 180w x 240h for a clean look
         self.camera_container = QFrame(self.central_widget)
-        self.camera_container.setGeometry(920, 420, 320, 240)
+        self.camera_container.setGeometry(1080, 460, 180, 240)
         self.camera_container.setStyleSheet(f"""
             QFrame {{
-                border: 2px solid {ACCENT_COLOR};
+                border: 1px solid rgba(20, 184, 166, 0.5);
                 background-color: black;
-                border-radius: 16px;
+                border-radius: 8px;
             }}
         """)
-
         cam_layout = QVBoxLayout(self.camera_container)
-        cam_layout.setContentsMargins(2, 2, 2, 2)
+        cam_layout.setContentsMargins(1, 1, 1, 1)
         self.camera_label = QLabel()
         self.camera_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.camera_label.setStyleSheet("border-radius: 14px; background: black;")
+        self.camera_label.setStyleSheet("border-radius: 7px; background: black;")
         cam_layout.addWidget(self.camera_label)
         self.camera_container.raise_()
 
@@ -193,45 +183,41 @@ class MachineGUI(QMainWindow):
         layout = QVBoxLayout(page)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        label = QLabel("Bereit zum Scannen")
-        label.setFont(QFont("Roboto", 56, QFont.Weight.ExtraLight))
-        label.setStyleSheet("margin-bottom: 10px;")
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        sub_label = QLabel("Bitte halten Sie Ihren QR-Code vor die Kamera")
-        sub_label.setFont(QFont("Roboto", 24))
-        sub_label.setStyleSheet("color: rgba(248, 250, 252, 0.6);")
-        sub_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl = QLabel("Bereit zum Scannen")
+        lbl.setFont(QFont("Roboto", 56, QFont.Weight.ExtraLight))
+        sub = QLabel("Bitte halten Sie Ihren QR-Code vor die Kamera")
+        sub.setFont(QFont("Roboto", 24))
+        sub.setStyleSheet("color: rgba(248, 250, 252, 0.5);")
 
         layout.addStretch(1)
-        layout.addWidget(label)
-        layout.addWidget(sub_label)
+        layout.addWidget(lbl, 0, Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(sub, 0, Qt.AlignmentFlag.AlignCenter)
         layout.addStretch(1)
         return page
 
     def _create_success_page(self):
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(100, 120, 100, 20)
+        layout.setContentsMargins(100, 120, 100, 40)
 
         self.success_header = QLabel("Abgabe bestätigt")
         self.success_header.setFont(QFont("Roboto", 42, QFont.Weight.Bold))
         self.success_header.setStyleSheet(
-            f"color: {ACCENT_COLOR}; margin-bottom: 30px;"
+            f"color: {ACCENT_COLOR}; margin-bottom: 20px;"
         )
 
         self.med_table = QTableWidget()
         self.med_table.setColumnCount(2)
         self.med_table.setHorizontalHeaderLabels(["Medikament", "Menge"])
 
-        header = self.med_table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
-        header.setDefaultAlignment(
+        h = self.med_table.horizontalHeader()
+        h.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        h.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
+        h.setDefaultAlignment(
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
         )
 
-        self.med_table.setColumnWidth(1, 220)
+        self.med_table.setColumnWidth(1, 200)
         self.med_table.setFont(QFont("Roboto", 20))
         self.med_table.verticalHeader().setVisible(False)
         self.med_table.setShowGrid(False)
@@ -241,54 +227,34 @@ class MachineGUI(QMainWindow):
 
         self.med_table.setStyleSheet(f"""
             QTableWidget {{
-                background-color: {SURFACE_COLOR};
-                alternate-background-color: #262f3f;
-                color: {TEXT_COLOR};
-                gridline-color: transparent;
-                border-radius: 20px;
-                padding: 10px;
-                outline: none;
+                background-color: {SURFACE_COLOR}; alternate-background-color: #262f3f;
+                color: {TEXT_COLOR}; border-radius: 15px; padding: 10px; outline: none;
             }}
             QHeaderView::section {{
-                background-color: transparent;
-                color: {ACCENT_COLOR};
-                padding: 15px;
-                font-weight: bold;
-                border: none;
-                font-size: 18px;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                text-align: left;
+                background: transparent; color: {ACCENT_COLOR}; padding: 15px; font-weight: bold;
+                font-size: 18px; border: none; text-align: left;
             }}
-            QTableWidget::item {{
-                padding: 15px;
-                border-bottom: 1px solid #334155;
-            }}
+            QTableWidget::item {{ padding: 15px; border-bottom: 1px solid #334155; }}
         """)
 
         layout.addWidget(self.success_header)
         layout.addWidget(self.med_table)
-        layout.addStretch(1)
         return page
 
     def _create_error_page(self):
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
         self.error_header = QLabel("Fehler")
         self.error_header.setFont(QFont("Roboto", 56, QFont.Weight.Bold))
         self.error_header.setStyleSheet(f"color: {ERROR_COLOR};")
-        self.error_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
         self.error_msg = QLabel("")
         self.error_msg.setFont(QFont("Roboto", 28))
-        self.error_msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.error_msg.setWordWrap(True)
-
+        self.error_msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addStretch(1)
-        layout.addWidget(self.error_header)
-        layout.addWidget(self.error_msg)
+        layout.addWidget(self.error_header, 0, Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.error_msg, 0, Qt.AlignmentFlag.AlignCenter)
         layout.addStretch(1)
         return page
 
@@ -299,6 +265,8 @@ class MachineGUI(QMainWindow):
         self.signals.update_frame.connect(self.set_camera_frame)
 
     def set_camera_frame(self, image):
+        # Resize to portrait 3:4 if camera is rotated or crop
+        # Here we just scale to fit the 180x240 label
         self.camera_label.setPixmap(
             QPixmap.fromImage(image).scaled(
                 self.camera_label.size(),
@@ -311,15 +279,27 @@ class MachineGUI(QMainWindow):
         self.stack.setCurrentIndex(0)
 
     def display_success(self, order):
-        self.stack.setCurrentIndex(1)
+        # Explicit data binding fix
         prescriptions = order.get("prescriptions", [])
+        if not prescriptions:
+            # Check for generic list structure in case order is a list
+            if isinstance(order, list):
+                prescriptions = order
+            else:
+                # Fallback to items if prescriptions is empty
+                prescriptions = order.get("items", [])
 
         self.med_table.setRowCount(0)
         self.med_table.setRowCount(len(prescriptions))
 
         for i, p in enumerate(prescriptions):
-            name = p.get("medication_name") or p.get("name") or "Unbekannt"
-            dosage = "1 Packung"
+            # Key mapping for medication names
+            name = (
+                p.get("medication_name")
+                or p.get("name")
+                or p.get("medication", {}).get("name", "Unbekannt")
+            )
+            dosage = str(p.get("dosage") or p.get("quantity") or "1 Packung")
 
             item_name = QTableWidgetItem(name)
             item_dosage = QTableWidgetItem(dosage)
@@ -327,6 +307,7 @@ class MachineGUI(QMainWindow):
             item_name.setForeground(QColor(TEXT_COLOR))
             item_dosage.setForeground(QColor(TEXT_COLOR))
 
+            # Set alignment for cells
             item_name.setTextAlignment(
                 Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
             )
@@ -336,15 +317,12 @@ class MachineGUI(QMainWindow):
 
             self.med_table.setItem(i, 0, item_name)
             self.med_table.setItem(i, 1, item_dosage)
-            self.med_table.setRowHeight(i, 80)
+            self.med_table.setRowHeight(i, 70)
 
+        self.stack.setCurrentIndex(1)
         QTimer.singleShot(10000, self.display_idle)
 
     def display_error(self, message):
-        if any(x in message for x in ["Verbindung", "401", "Server"]):
-            self.error_header.setText("Verbindungsfehler")
-        else:
-            self.error_header.setText("Ungültiger Code")
         self.error_msg.setText(message)
         self.stack.setCurrentIndex(2)
         QTimer.singleShot(6000, self.display_idle)
