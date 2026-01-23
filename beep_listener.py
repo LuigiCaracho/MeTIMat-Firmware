@@ -25,6 +25,7 @@ def play_beep():
 
     try:
         logging.info("🔊 Playing beep...")
+        logging.info(" ".join(["ffplay", "-nodisp", "-autoexit", SOUND_PATH]))
         # -nodisp: no video, -autoexit: exit when done, -loglevel quiet: no logs
         subprocess.Popen(["ffplay", "-nodisp", "-autoexit", SOUND_PATH])
     except Exception as e:
