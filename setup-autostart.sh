@@ -1,46 +1,71 @@
 #!/bin/bash
 
-# Pfad zur App - BITTE PRÜFEN ob dieser Ordner existiert!
-APP_DIR="$HOME/MeTIMat-Firmware"
+# MeTIMat Autostart Setup Script
+# This script detects the current directory and sets up a reliable autostart.
+
+# 1. Detect actual application directory
+# Using the directory where this setup script is located as the source of truth
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 AUTOSTART_DIR="$HOME/.config/autostart"
 DESKTOP_FILE="$AUTOSTART_DIR/metimat.desktop"
+LOG_FILE="$HOME/metimat_autostart.log"
 
-echo "🚀 MeTIMat Autostart Setup für Raspberry Pi OS..."
+echo "🚀 Setting up MeTIMat Autostart..."
+echo "📍 Detected App Directory: $SCRIPT_DIR"
 
-# 1. Verzeichnis erstellen
+# 2. Ensure autostart directory exists
 mkdir -p "$AUTOSTART_DIR"
 
-# 2. .desktop Datei erstellen
-# Wir fügen ein 'sleep 5' ein, um sicherzustellen, dass der Desktop/Grafiktreiber bereit ist
+# 3. Create the .desktop file
+# We use 'bash -c' to ensure environment variables like DISPLAY are available
+# and to handle logging correctly. 'sleep 8' ensures the desktop environment
+# and graphics drivers (especially on Pi 4/5) are fully initialized.
+echo "📝 Creating desktop entry at $DESKTOP_FILE"
+
 cat <<EOF > "$DESKTOP_FILE"
 [Desktop Entry]
 Type=Application
-Name=MeTIMat
-Exec=bash -c "sleep 5 && cd $APP_DIR && ./run.sh > $HOME/metimat.log 2>&1"
+Name=MeTIMat Machine Interface
+Comment=Starts MeTIMat Firmware on Boot
+Exec=bash -c "sleep 8; cd $SCRIPT_DIR && ./run.sh >> $LOG_FILE 2>&1"
 Terminal=false
 X-GNOME-Autostart-enabled=true
+Categories=Utility;
 EOF
 
-# 3. Berechtigungen setzen
+# 4. Make scripts executable
 chmod +x "$DESKTOP_FILE"
-if [ -d "$APP_DIR" ]; then
-    chmod +x "$APP_DIR/run.sh" 2>/dev/null
-    echo "✅ Berechtigungen für run.sh gesetzt."
-else
-    echo "⚠️  HINWEIS: Ordner $APP_DIR wurde nicht gefunden. Verschiebe deine Dateien dorthin!"
-fi
+chmod +x "$SCRIPT_DIR/run.sh"
+echo "✅ Permissions updated."
 
-# 4. Bildschirmschoner deaktivieren (für X11 Umgebungen)
+# 5. Disable Screen Blanking / Power Management
+# For X11 (Bullseye and older)
 XWRAPPER="$HOME/.xsessionrc"
-if ! grep -q "xset" "$XWRAPPER" 2>/dev/null; then
-    echo "xset s off -dpms s noblank" >> "$XWRAPPER"
-    echo "✅ Bildschirmschoner-Deaktivierung zu .xsessionrc hinzugefügt."
+if ! grep -q "xset s off" "$XWRAPPER" 2>/dev/null; then
+    {
+        echo ""
+        echo "# MeTIMat: Disable screensaver"
+        echo "export DISPLAY=:0"
+        echo "xset s off"
+        echo "xset -dpms"
+        echo "xset s noblank"
+    } >> "$XWRAPPER"
+    echo "✅ X11 Screen blanking disabled in .xsessionrc"
 fi
 
-# 5. Wayland/Bookworm Spezifikum (Energiesparen via gsettings)
+# For Wayland (Bookworm/Pi 5)
 if command -v gsettings >/dev/null 2>&1; then
     gsettings set org.gnome.desktop.session idle-delay 0 2>/dev/null
-    echo "✅ Wayland Idle-Delay auf 0 gesetzt."
+    gsettings set org.gnome.desktop.screensaver lock-enabled false 2>/dev/null
+    echo "✅ Wayland Power Management disabled via gsettings"
 fi
 
-echo "✨ Setup abgeschlossen! Nach einem Neustart sollte die App erscheinen."
+# 6. Verify run.sh content
+if ! grep -q "export DISPLAY" "$SCRIPT_DIR/run.sh"; then
+    echo "ℹ️  Tip: Ensure your run.sh contains 'export DISPLAY=:0' if the GUI fails to open."
+fi
+
+echo ""
+echo "✨ Setup Complete!"
+echo "🔄 Please REBOOT your Raspberry Pi now."
+echo "📋 Logs will be written to: $LOG_FILE"
