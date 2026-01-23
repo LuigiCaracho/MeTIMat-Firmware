@@ -35,45 +35,26 @@ SOUND_PATH = os.path.join(os.path.dirname(__file__), "assets/sounds/beep.mp3")
 
 def play_beep():
     """
-    Plays the scan sound as user 'metimat' to bypass root audio restrictions.
+    Plays the scan sound.
     """
-    logging.info(f"🔊 Attempting to play beep sound from: {SOUND_PATH}")
 
-    if not os.path.exists(SOUND_PATH):
-        logging.warning(f"⚠️ Sound file not found: {SOUND_PATH}")
-        return
+    def run_playback():
+        logging.info(f"🔊 Attempting to play beep sound from: {SOUND_PATH}")
+        if not os.path.exists(SOUND_PATH):
+            logging.warning(f"⚠️ Sound file not found: {SOUND_PATH}")
+            return
 
-    # When running as root (required for LED DMA), we need to tell the audio client
-    # where to find the user's PulseAudio/PipeWire socket.
-    try:
-        # PULSE_SERVER typically points to the user's runtime directory.
-        # We also set the XDG_RUNTIME_DIR to help the client find the socket.
-        env = os.environ.copy()
-        user_id = "1000"  # Standard ID for the first user (metimat)
-        env["PULSE_SERVER"] = f"unix:/run/user/{user_id}/pulse/native"
-        env["XDG_RUNTIME_DIR"] = f"/run/user/{user_id}"
+        # Use ffplay with forced direct ALSA output to bypass PulseAudio/Root issues
+        # Or try paplay if Pulse is running. We use os.system in a thread to be safe.
+        try:
+            # Try ffplay with alsa driver directly
+            cmd = f"ffplay -nodisp -autoexit -loglevel quiet -driver alsa {SOUND_PATH} > /dev/null 2>&1"
+            logging.info(f"🔊 Executing: {cmd}")
+            os.system(cmd)
+        except Exception as e:
+            logging.error(f"❌ Playback thread failed: {e}")
 
-        if SOUND_PATH.endswith(".mp3"):
-            cmd = [
-                "ffplay",
-                "-nodisp",
-                "-autoexit",
-                "-loglevel",
-                "quiet",
-                SOUND_PATH,
-            ]
-        else:
-            cmd = ["paplay", SOUND_PATH]
-
-        logging.info(
-            f"🔊 Running playback command: {' '.join(cmd)} with PULSE_SERVER env"
-        )
-        # Use Popen to run in background without blocking
-        subprocess.Popen(
-            cmd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
-    except Exception as e:
-        logging.error(f"❌ Failed to play sound via Pulse environment: {e}")
+    threading.Thread(target=run_playback, daemon=True).start()
 
 
 def complete_order(url: str, order_id: int):
