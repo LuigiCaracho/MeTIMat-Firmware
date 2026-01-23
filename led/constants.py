@@ -9,7 +9,7 @@ COLOR_LOGO_TURQUOISE = Color(0, 168, 168)  # #00a8a8
 COLOR_WHITE = Color(255, 255, 255)  # #ffffff
 
 # Strip Settings
-LED_COUNT = 15
+LED_COUNT = 24
 LED_GPIO_PIN = 18
 LED_FREQ = 800000
 LED_DMA = 10
