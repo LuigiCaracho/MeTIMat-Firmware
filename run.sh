@@ -19,6 +19,13 @@ if [ ! -f "$PYTHON_BIN" ]; then
     exit 1
 fi
 
-# Run the main script
-# Using the absolute path for main.py as well
+# Start the beep listener in the user context (as the current user)
+# This handles audio playback since root often doesn't have access to the user's audio session.
+"$PYTHON_BIN" "$SCRIPT_DIR/beep_listener.py" &
+BEEP_PID=$!
+
+# Run the main script as root (required for LED DMA)
 sudo "$PYTHON_BIN" "$SCRIPT_DIR/main.py"
+
+# Clean up the beep listener when the main script exits
+kill $BEEP_PID

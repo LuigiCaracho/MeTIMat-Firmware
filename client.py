@@ -1,6 +1,5 @@
 import logging
-import os
-import subprocess
+import socket
 import threading
 
 import requests
@@ -9,52 +8,24 @@ from gui_parts.constants import gui_signals
 from led.constants import COLOR_GREEN, COLOR_RED, COLOR_YELLOW
 from led.controller import LEDController
 
-# Use simpleaudio for potentially more robust playback on Linux
-try:
-    import simpleaudio as sa
-
-    HAS_SIMPLEAUDIO = True
-except ImportError:
-    HAS_SIMPLEAUDIO = False
-
-# Fallback to pygame if simpleaudio is not available
-HAS_PYGAME = False
-if not HAS_SIMPLEAUDIO:
-    try:
-        import pygame
-
-        pygame.mixer.init()
-        HAS_PYGAME = True
-    except ImportError:
-        pass
-
 logging.basicConfig(level=logging.INFO)
 
-SOUND_PATH = os.path.join(os.path.dirname(__file__), "assets/sounds/beep.mp3")
+# UDP Settings for beep listener
+UDP_IP = "127.0.0.1"
+UDP_PORT = 5005
 
 
 def play_beep():
     """
-    Plays the scan sound.
+    Sends a UDP signal to the local beep_listener.py process.
     """
-
-    def run_playback():
-        logging.info(f"🔊 Attempting to play beep sound from: {SOUND_PATH}")
-        if not os.path.exists(SOUND_PATH):
-            logging.warning(f"⚠️ Sound file not found: {SOUND_PATH}")
-            return
-
-        # Use ffplay with forced direct ALSA output to bypass PulseAudio/Root issues
-        # Or try paplay if Pulse is running. We use os.system in a thread to be safe.
-        try:
-            # Try ffplay with alsa driver directly
-            cmd = f"ffplay -nodisp -autoexit -loglevel quiet -driver alsa {SOUND_PATH} > /dev/null 2>&1"
-            logging.info(f"🔊 Executing: {cmd}")
-            os.system(cmd)
-        except Exception as e:
-            logging.error(f"❌ Playback thread failed: {e}")
-
-    threading.Thread(target=run_playback, daemon=True).start()
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.sendto(b"BEEP", (UDP_IP, UDP_PORT))
+        sock.close()
+        logging.info("🔊 UDP BEEP signal sent")
+    except Exception as e:
+        logging.error(f"❌ Failed to send UDP BEEP: {e}")
 
 
 def complete_order(url: str, order_id: int):
