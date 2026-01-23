@@ -9,3 +9,4 @@ uvicorn
 dotenv
 pygame
 PyQt6
+PyQt6-QtSvg

@@ -12,28 +12,43 @@ from config import API_URL, CAMERA_ID, DUPLICATE_TIMEOUT
 from dedup import Deduplicator
 from gui import MachineGUI, gui_signals
 from led.controller import LEDController
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QImage
 from PyQt6.QtWidgets import QApplication
 from scanner import scan_camera
 
 
 def scanner_worker(led_controller):
     """
-    Background worker for QR code scanning.
+    Background worker for QR code scanning and camera feed updates.
     """
     dedup = Deduplicator(DUPLICATE_TIMEOUT)
 
     while True:
         try:
             for data, frame in scan_camera(CAMERA_ID):
+                # 1. Update GUI Camera Feed
+                if frame is not None:
+                    # Convert BGR (OpenCV) to RGB (Qt)
+                    rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    h, w, ch = rgb_image.shape
+                    bytes_per_line = ch * w
+                    qt_image = QImage(
+                        rgb_image.data,
+                        w,
+                        h,
+                        bytes_per_line,
+                        QImage.Format.Format_RGB888,
+                    )
+                    # Emit signal to update GUI in main thread
+                    gui_signals.update_frame.emit(qt_image)
+
+                # 2. Process QR Data
                 if data:
                     if dedup.is_new(data):
                         print(f"📦 Neuer Scan: {data}")
                         send_scan(API_URL, data, led_controller)
 
-                # Opencv window for debugging (optional in headless mode)
-                # cv2.imshow("QR Scanner", frame)
-                # if cv2.waitKey(1) & 0xFF == 27:
-                #     break
         except Exception as e:
             print(f"Scanner Error: {e}")
             continue
