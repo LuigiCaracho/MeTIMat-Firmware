@@ -132,7 +132,7 @@ class MachineGUI(QMainWindow):
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         lbl = QLabel("Bereit zum Scannen")
-        lbl.setFont(QFont("Roboto", 56, QFont.Weight.ExtraLight))
+        lbl.setFont(QFont("Roboto", 56, QFont.Weight.Bold))
         lbl.setStyleSheet("color: white;")
 
         sub = QLabel("Bitte halten Sie Ihren QR-Code vor die Kamera")
