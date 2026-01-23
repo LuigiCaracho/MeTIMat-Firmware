@@ -99,8 +99,7 @@ class MachineGUI(QMainWindow):
         self.connect_signals()
 
     def init_ui(self):
-        # Window Setup (720p 16:9)
-        self.setFixedSize(1280, 720)
+        # Window Setup (720p 16:9 targeted, but full screen)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setStyleSheet(
             f"background-color: {BG_COLOR}; color: {TEXT_COLOR}; border: none;"
@@ -129,7 +128,7 @@ class MachineGUI(QMainWindow):
         self.stack.addWidget(self._create_success_page())
         self.stack.addWidget(self._create_error_page())
 
-        self.show()
+        self.showFullScreen()
 
     def _setup_overlays(self):
         # Logo (Top Left)
@@ -223,12 +222,35 @@ class MachineGUI(QMainWindow):
             QTableWidget {{
                 background-color: {SURFACE_COLOR}; alternate-background-color: #262f3f;
                 color: {TEXT_COLOR}; border-radius: 15px; padding: 10px; outline: none;
+                border: none;
             }}
             QHeaderView::section {{
                 background: transparent; color: {ACCENT_COLOR}; padding: 15px; font-weight: bold;
                 font-size: 18px; border: none; text-align: left;
             }}
             QTableWidget::item {{ padding: 15px; border-bottom: 1px solid #334155; }}
+
+            QScrollBar:vertical {{
+                border: none;
+                background: transparent;
+                width: 12px;
+                margin: 0px 0px 0px 0px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: rgba(20, 184, 166, 0.3);
+                min-height: 40px;
+                border-radius: 6px;
+                margin: 2px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background: rgba(20, 184, 166, 0.6);
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                border: none; background: none; height: 0px;
+            }}
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+                background: none;
+            }}
         """)
 
         layout.addWidget(self.success_header)
@@ -271,11 +293,8 @@ class MachineGUI(QMainWindow):
         self.stack.setCurrentIndex(0)
 
     def display_success(self, order):
-        # Data binding for medication list
-        # Extract items from common response patterns
         items = []
         if isinstance(order, dict):
-            # Prioritize 'medication_items' or 'prescriptions'
             items = (
                 order.get("medication_items")
                 or order.get("prescriptions")
@@ -289,27 +308,21 @@ class MachineGUI(QMainWindow):
         self.med_table.setRowCount(len(items))
 
         for i, item in enumerate(items):
-            # Support nested medication objects (e.g., from medication_items)
             med_info = (
                 item.get("medication")
                 if isinstance(item.get("medication"), dict)
                 else item
             )
-
             name = (
                 med_info.get("medication_name") or med_info.get("name") or "Unbekannt"
             )
-
-            # Determine quantity/dosage
             qty = item.get("quantity") or item.get("dosage") or "1"
             dosage = f"{qty} Packung" if str(qty).isdigit() else str(qty)
 
             item_name = QTableWidgetItem(name)
             item_dosage = QTableWidgetItem(dosage)
-
             item_name.setForeground(QColor(TEXT_COLOR))
             item_dosage.setForeground(QColor(TEXT_COLOR))
-
             item_name.setTextAlignment(
                 Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
             )
