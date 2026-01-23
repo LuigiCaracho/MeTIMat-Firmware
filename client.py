@@ -34,7 +34,7 @@ SOUND_PATH = os.path.join(os.path.dirname(__file__), "assets/sounds/beep.mp3")
 
 def play_beep():
     """
-    Plays the scan sound.
+    Plays the scan sound as user 'metimat' to bypass root audio restrictions.
     """
     logging.info(f"🔊 Attempting to play beep sound from: {SOUND_PATH}")
 
@@ -42,34 +42,20 @@ def play_beep():
         logging.warning(f"⚠️ Sound file not found: {SOUND_PATH}")
         return
 
-    # Try simpleaudio first (often more reliable for ALSA/Pulse direct output)
-    if HAS_SIMPLEAUDIO:
-        try:
-            logging.info("🔊 Playing with simpleaudio...")
-            wave_obj = sa.WaveObject.from_wave_file(SOUND_PATH.replace(".mp3", ".wav"))
-            play_obj = wave_obj.play()
-            return
-        except Exception as e:
-            logging.warning(f"⚠️ simpleaudio failed: {e}. Falling back...")
+    # When running as root (required for LED DMA), audio servers like PulseAudio/PipeWire
+    # usually block playback. We use sudo -u to play as the regular user.
+    try:
+        if SOUND_PATH.endswith(".mp3"):
+            # Try ffplay (installed) as user metimat
+            cmd = f"sudo -u metimat ffplay -nodisp -autoexit -loglevel quiet {SOUND_PATH} > /dev/null 2>&1 &"
+        else:
+            # Try paplay or pw-play (installed) as user metimat
+            cmd = f"sudo -u metimat paplay {SOUND_PATH} > /dev/null 2>&1 &"
 
-    # Fallback to pygame
-    if HAS_PYGAME:
-        try:
-            if not pygame.mixer.get_init():
-                pygame.mixer.init()
-            sound = pygame.mixer.Sound(SOUND_PATH)
-            sound.play()
-            logging.info("🔊 Played with pygame.")
-            return
-        except Exception as e:
-            logging.error(f"❌ pygame failed: {e}")
-
-    # Final fallback: system command (aplay/mpg123)
-    logging.info("🔊 Attempting system command fallback...")
-    if SOUND_PATH.endswith(".mp3"):
-        os.system(f"mpg123 -q {SOUND_PATH} &")
-    else:
-        os.system(f"aplay -q {SOUND_PATH} &")
+        logging.info(f"🔊 Running playback command: {cmd}")
+        os.system(cmd)
+    except Exception as e:
+        logging.error(f"❌ Failed to play sound via sudo: {e}")
 
 
 def complete_order(url: str, order_id: int):
