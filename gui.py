@@ -160,7 +160,6 @@ class MachineGUI(QMainWindow):
         self.close_btn.raise_()
 
         # Camera Overlay (Portrait 3:4 aspect, minimalist)
-        # No border and no rounding as requested
         self.camera_container = QFrame(self.central_widget)
         self.camera_container.setGeometry(1080, 460, 180, 240)
         self.camera_container.setStyleSheet("background-color: black; border: none;")
@@ -273,23 +272,37 @@ class MachineGUI(QMainWindow):
 
     def display_success(self, order):
         # Data binding for medication list
-        prescriptions = order.get("prescriptions", [])
-        if not prescriptions:
-            if isinstance(order, list):
-                prescriptions = order
-            else:
-                prescriptions = order.get("items", [])
+        # Extract items from common response patterns
+        items = []
+        if isinstance(order, dict):
+            # Prioritize 'medication_items' or 'prescriptions'
+            items = (
+                order.get("medication_items")
+                or order.get("prescriptions")
+                or order.get("items")
+                or []
+            )
+        elif isinstance(order, list):
+            items = order
 
         self.med_table.setRowCount(0)
-        self.med_table.setRowCount(len(prescriptions))
+        self.med_table.setRowCount(len(items))
 
-        for i, p in enumerate(prescriptions):
-            name = (
-                p.get("medication_name")
-                or p.get("name")
-                or p.get("medication", {}).get("name", "Unbekannt")
+        for i, item in enumerate(items):
+            # Support nested medication objects (e.g., from medication_items)
+            med_info = (
+                item.get("medication")
+                if isinstance(item.get("medication"), dict)
+                else item
             )
-            dosage = str(p.get("dosage") or p.get("quantity") or "1 Packung")
+
+            name = (
+                med_info.get("medication_name") or med_info.get("name") or "Unbekannt"
+            )
+
+            # Determine quantity/dosage
+            qty = item.get("quantity") or item.get("dosage") or "1"
+            dosage = f"{qty} Packung" if str(qty).isdigit() else str(qty)
 
             item_name = QTableWidgetItem(name)
             item_dosage = QTableWidgetItem(dosage)
