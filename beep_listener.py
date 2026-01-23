@@ -33,6 +33,12 @@ def play_beep():
 
 
 def main():
+    # Start a persistent silent stream to keep Bluetooth speakers awake
+    logging.info("🔇 Starting silent background stream to keep speaker active...")
+    silence_proc = subprocess.Popen(
+        ["ffplay", "-f", "lavfi", "-i", "anullsrc", "-nodisp", "-loglevel", "quiet"]
+    )
+
     # Create UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((UDP_IP, UDP_PORT))
@@ -53,6 +59,7 @@ def main():
         logging.info("Stopping beep listener...")
     finally:
         sock.close()
+        silence_proc.terminate()
 
 
 if __name__ == "__main__":
