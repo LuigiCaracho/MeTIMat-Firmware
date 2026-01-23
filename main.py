@@ -30,8 +30,8 @@ def scanner_worker(led_controller):
             for data, frame in scan_camera(CAMERA_ID):
                 # 1. Update GUI Camera Feed
                 if frame is not None:
-                    # Rotate frame 90 degrees counter-clockwise
-                    frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                    # Rotate frame 90 degrees clockwise
+                    frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
                     # Convert BGR (OpenCV) to RGB (Qt)
                     rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     h, w, ch = rgb_image.shape

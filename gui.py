@@ -115,9 +115,8 @@ class MachineGUI(QMainWindow):
         self.logo_widget.setGeometry(30, 30, 80, 80)
         self.close_btn.setGeometry(w - 90, 30, 60, 60)
 
-        # Reposition Camera to absolute bottom-left corner, slightly smaller
-        # 150x200 portrait, no margin to corner
-        cam_w, cam_h = 150, 200
+        # Reposition Camera to absolute bottom-left corner, landscape
+        cam_w, cam_h = 240, 180
         self.camera_container.setGeometry(0, h - cam_h, cam_w, cam_h)
 
         # Ensure Z-Order
