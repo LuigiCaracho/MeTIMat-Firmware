@@ -1,5 +1,6 @@
 import logging
 import os
+import subprocess
 import threading
 
 import requests
@@ -43,17 +44,29 @@ def play_beep():
         return
 
     # When running as root (required for LED DMA), audio servers like PulseAudio/PipeWire
-    # usually block playback. We use sudo -u to play as the regular user.
+    # usually block playback. We use sudo -n -u to play as the regular user without interaction.
     try:
         if SOUND_PATH.endswith(".mp3"):
-            # Try ffplay (installed) as user metimat
-            cmd = f"sudo -u metimat ffplay -nodisp -autoexit -loglevel quiet {SOUND_PATH} > /dev/null 2>&1 &"
+            # Use ffplay as user frederik
+            cmd = [
+                "sudo",
+                "-n",
+                "-u",
+                "metimat",
+                "ffplay",
+                "-nodisp",
+                "-autoexit",
+                "-loglevel",
+                "quiet",
+                SOUND_PATH,
+            ]
         else:
-            # Try paplay or pw-play (installed) as user metimat
-            cmd = f"sudo -u metimat paplay {SOUND_PATH} > /dev/null 2>&1 &"
+            # Use paplay as user frederik
+            cmd = ["sudo", "-n", "-u", "metimat", "paplay", SOUND_PATH]
 
-        logging.info(f"🔊 Running playback command: {cmd}")
-        os.system(cmd)
+        logging.info(f"🔊 Running playback command: {' '.join(cmd)}")
+        # Use Popen to run in background without blocking
+        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except Exception as e:
         logging.error(f"❌ Failed to play sound via sudo: {e}")
 
