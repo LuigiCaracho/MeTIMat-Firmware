@@ -231,12 +231,11 @@ class MachineGUI(QMainWindow):
     def display_success(self, order):
         items = []
         if isinstance(order, dict):
-            items = (
-                order.get("medication_items")
-                or order.get("prescriptions")
-                or order.get("items")
-                or []
-            )
+            # Combine prescriptions and medication items to show both types
+            prescriptions = order.get("prescriptions") or []
+            medication_items = order.get("medication_items") or []
+            other_items = order.get("items") or []
+            items = prescriptions + medication_items + other_items
         elif isinstance(order, list):
             items = order
 

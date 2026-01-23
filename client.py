@@ -93,9 +93,16 @@ def send_scan(url: str, qr_data: str, led_controller: LEDController):
                     order_id = order.get("id", "Unknown")
 
                     prescriptions = order.get("prescriptions", [])
+                    medication_items = order.get("medication_items", [])
+
                     med_names = [
                         p.get("medication_name", "Unknown") for p in prescriptions
                     ]
+                    for item in medication_items:
+                        med = item.get("medication", {})
+                        name = med.get("name", "Unknown")
+                        qty = item.get("quantity", 1)
+                        med_names.append(f"{name} (x{qty})")
 
                     logging.info(f"✅ QR valid! Order #{order_id} confirmed.")
                     logging.info(f"📦 Items to dispense: {', '.join(med_names)}")
