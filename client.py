@@ -8,14 +8,24 @@ from gui_parts.constants import gui_signals
 from led.constants import COLOR_GREEN, COLOR_RED, COLOR_YELLOW
 from led.controller import LEDController
 
-# Use pygame for cross-platform audio playback
+# Use simpleaudio for potentially more robust playback on Linux
 try:
-    import pygame
+    import simpleaudio as sa
 
-    pygame.mixer.init()
-    HAS_PYGAME = True
+    HAS_SIMPLEAUDIO = True
 except ImportError:
-    HAS_PYGAME = False
+    HAS_SIMPLEAUDIO = False
+
+# Fallback to pygame if simpleaudio is not available
+HAS_PYGAME = False
+if not HAS_SIMPLEAUDIO:
+    try:
+        import pygame
+
+        pygame.mixer.init()
+        HAS_PYGAME = True
+    except ImportError:
+        pass
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,25 +37,39 @@ def play_beep():
     Plays the scan sound.
     """
     logging.info(f"🔊 Attempting to play beep sound from: {SOUND_PATH}")
-    if not HAS_PYGAME:
-        logging.warning("⚠️ pygame not installed, cannot play sound.")
-        return
 
     if not os.path.exists(SOUND_PATH):
         logging.warning(f"⚠️ Sound file not found: {SOUND_PATH}")
         return
 
-    try:
-        if not pygame.mixer.get_init():
-            logging.info("🔊 Initializing pygame mixer...")
-            pygame.mixer.init()
+    # Try simpleaudio first (often more reliable for ALSA/Pulse direct output)
+    if HAS_SIMPLEAUDIO:
+        try:
+            logging.info("🔊 Playing with simpleaudio...")
+            wave_obj = sa.WaveObject.from_wave_file(SOUND_PATH.replace(".mp3", ".wav"))
+            play_obj = wave_obj.play()
+            return
+        except Exception as e:
+            logging.warning(f"⚠️ simpleaudio failed: {e}. Falling back...")
 
-        sound = pygame.mixer.Sound(SOUND_PATH)
-        logging.info(f"🔊 Sound loaded (length: {sound.get_length()}s). Playing...")
-        sound.play()
-        logging.info("🔊 play() called successfully.")
-    except Exception as e:
-        logging.error(f"❌ Failed to play sound: {e}", exc_info=True)
+    # Fallback to pygame
+    if HAS_PYGAME:
+        try:
+            if not pygame.mixer.get_init():
+                pygame.mixer.init()
+            sound = pygame.mixer.Sound(SOUND_PATH)
+            sound.play()
+            logging.info("🔊 Played with pygame.")
+            return
+        except Exception as e:
+            logging.error(f"❌ pygame failed: {e}")
+
+    # Final fallback: system command (aplay/mpg123)
+    logging.info("🔊 Attempting system command fallback...")
+    if SOUND_PATH.endswith(".mp3"):
+        os.system(f"mpg123 -q {SOUND_PATH} &")
+    else:
+        os.system(f"aplay -q {SOUND_PATH} &")
 
 
 def complete_order(url: str, order_id: int):
