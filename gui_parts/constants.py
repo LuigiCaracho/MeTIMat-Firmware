@@ -2,7 +2,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtGui import QImage
 
 # Theme Colors
-BG_COLOR = "#1e3a8a"  # Deep Blue
+BG_COLOR = "#0f1c44"  # Deep Blue
 ACCENT_COLOR = "#14b8a6"  # Teal
 TEXT_COLOR = "#f8fafc"  # Slate 50
 SURFACE_COLOR = "#1e293b"  # Slate 800
