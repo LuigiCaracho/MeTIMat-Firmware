@@ -21,4 +21,4 @@ fi
 
 # Run the main script
 # Using the absolute path for main.py as well
-"$PYTHON_BIN" "$SCRIPT_DIR/main.py"
+sudo "$PYTHON_BIN" "$SCRIPT_DIR/main.py"
