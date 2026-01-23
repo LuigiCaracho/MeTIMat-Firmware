@@ -10,7 +10,8 @@ import cv2
 from client import send_scan
 from config import API_URL, CAMERA_ID, DUPLICATE_TIMEOUT
 from dedup import Deduplicator
-from gui import MachineGUI, gui_signals
+from gui import MachineGUI
+from gui_parts.constants import gui_signals
 from led.controller import LEDController
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QImage

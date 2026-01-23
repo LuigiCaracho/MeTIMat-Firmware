@@ -1,16 +1,19 @@
-import math
 import os
 import sys
 
-from PyQt6.QtCore import QObject, QRect, Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import (
-    QColor,
-    QFont,
-    QImage,
-    QPainter,
-    QPainterPath,
-    QPixmap,
+# Import extracted parts
+from gui_parts.constants import (
+    ACCENT_COLOR,
+    BG_COLOR,
+    ERROR_COLOR,
+    SURFACE_COLOR,
+    TEXT_COLOR,
+    MachineSignals,
+    gui_signals,
 )
+from gui_parts.widgets import WaveWidget
+from PyQt6.QtCore import QSize, Qt, QTimer
+from PyQt6.QtGui import QColor, QFont, QImage, QPixmap
 from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtWidgets import (
     QApplication,
@@ -26,69 +29,6 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
-# Constants for the theme
-BG_COLOR = "#1e3a8a"  # Deep Blue
-ACCENT_COLOR = "#14b8a6"  # Teal
-TEXT_COLOR = "#f8fafc"  # Slate 50
-SURFACE_COLOR = "#1e293b"  # Slate 800
-ERROR_COLOR = "#ef4444"  # Red-500
-
-
-class MachineSignals(QObject):
-    """Signals to update the GUI from other threads."""
-
-    show_idle = pyqtSignal()
-    show_success = pyqtSignal(dict)
-    show_error = pyqtSignal(str)
-    update_frame = pyqtSignal(QImage)
-
-
-class WaveWidget(QWidget):
-    """Animated wave widget for the background."""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.phase = 0
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_animation)
-        self.timer.start(30)
-        self.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-
-    def update_animation(self):
-        self.phase += 0.05
-        self.update()
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        width = self.width()
-        height = self.height()
-
-        # Draw two waves
-        self._draw_wave(
-            painter, width, height, self.phase, QColor(20, 184, 166, 60), 1.0, 30
-        )
-        self._draw_wave(
-            painter,
-            width,
-            height,
-            self.phase + math.pi * 0.5,
-            QColor(20, 184, 166, 110),
-            0.7,
-            20,
-        )
-
-    def _draw_wave(self, painter, w, h, phase, color, frequency, amplitude):
-        path = QPainterPath()
-        path.moveTo(0, h)
-        mid_y = h / 2
-        for x in range(0, w + 1, 5):
-            y = mid_y + math.sin(x * 0.008 * frequency + phase) * amplitude
-            path.lineTo(float(x), y)
-        path.lineTo(w, h)
-        path.closeSubpath()
-        painter.fillPath(path, color)
 
 
 class MachineGUI(QMainWindow):
@@ -150,7 +90,7 @@ class MachineGUI(QMainWindow):
         """)
         self.close_btn.clicked.connect(self.close)
 
-        # Camera Overlay
+        # Camera Overlay (Smaller, portrait 3:4 aspect, bottom right corner)
         self.camera_container = QFrame(self.central_widget)
         self.camera_container.setStyleSheet("background-color: black; border: none;")
         cam_layout = QVBoxLayout(self.camera_container)
@@ -175,9 +115,10 @@ class MachineGUI(QMainWindow):
         self.logo_widget.setGeometry(30, 30, 80, 80)
         self.close_btn.setGeometry(w - 90, 30, 60, 60)
 
-        # Reposition Camera to Bottom-Right Corner
-        # 180x240 portrait, 20px margin from edges
-        self.camera_container.setGeometry(w - 180 - 30, h - 240 - 30, 180, 240)
+        # Reposition Camera to absolute bottom-right corner, slightly smaller
+        # 150x200 portrait, no margin to corner
+        cam_w, cam_h = 150, 200
+        self.camera_container.setGeometry(w - cam_w, h - cam_h, cam_w, cam_h)
 
         # Ensure Z-Order
         self.waves.lower()
@@ -218,7 +159,6 @@ class MachineGUI(QMainWindow):
         self.med_table = QTableWidget()
         self.med_table.setColumnCount(2)
         self.med_table.setHorizontalHeaderLabels(["Medikament", "Menge"])
-
         h = self.med_table.horizontalHeader()
         h.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         h.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
@@ -325,7 +265,6 @@ class MachineGUI(QMainWindow):
             item_dosage.setTextAlignment(
                 Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
             )
-
             self.med_table.setItem(i, 0, item_name)
             self.med_table.setItem(i, 1, item_dosage)
             self.med_table.setRowHeight(i, 70)
@@ -337,9 +276,6 @@ class MachineGUI(QMainWindow):
         self.error_msg.setText(message)
         self.stack.setCurrentIndex(2)
         QTimer.singleShot(6000, self.display_idle)
-
-
-gui_signals = MachineSignals()
 
 
 def run_gui_app():

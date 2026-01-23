@@ -4,7 +4,7 @@ import threading
 
 import requests
 from config import MACHINE_ACCESS_TOKEN
-from gui import gui_signals
+from gui_parts.constants import gui_signals
 from led.constants import COLOR_GREEN, COLOR_RED, COLOR_YELLOW
 from led.controller import LEDController
 
