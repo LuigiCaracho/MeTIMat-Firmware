@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import uvicorn
-from config import API_LISTEN_HOST, API_PORT, API_URL, MACHINE_ACCESS_TOKEN
+from config import API_LISTEN_HOST, API_LISTEN_PORT, API_URL, MACHINE_ACCESS_TOKEN
 from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel
 from schemas.location import Location
@@ -101,5 +101,5 @@ async def legacy_scan(request: ScanRequest):
 
 
 if __name__ == "__main__":
-    print(f"API Server läuft auf http://{API_LISTEN_HOST}:{API_PORT}")
-    uvicorn.run(app, host=API_LISTEN_HOST, port=API_PORT)
+    print(f"API Server läuft auf http://{API_LISTEN_HOST}:{API_LISTEN_PORT}")
+    uvicorn.run(app, host=API_LISTEN_HOST, port=API_LISTEN_PORT)
