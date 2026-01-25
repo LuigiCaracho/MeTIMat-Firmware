@@ -13,7 +13,6 @@ from dedup import Deduplicator
 from gui import MachineGUI
 from gui_parts.constants import gui_signals
 from led.controller import LEDController
-from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QImage
 from PyQt6.QtWidgets import QApplication
 from scanner import scan_camera
@@ -69,7 +68,7 @@ def main():
 
     # 3. Launch GUI (Main Thread)
     app = QApplication(sys.argv)
-    window = MachineGUI(gui_signals)
+    _ = MachineGUI(gui_signals)
 
     # Run the application
     sys.exit(app.exec())

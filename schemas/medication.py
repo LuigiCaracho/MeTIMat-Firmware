@@ -7,12 +7,12 @@ from pydantic import BaseModel
 class MedicationBase(BaseModel):
     name: str
     pzn: str
-    description: Optional[str] = None
-    dosage_form: Optional[str] = None
-    manufacturer: Optional[str] = None
-    package_size: Optional[str] = None
-    price: Optional[float] = 0.0
-    is_active: Optional[bool] = True
+    description: str | None = None
+    dosage_form: str | None = None
+    manufacturer: str | None = None
+    package_size: str | None = None
+    price: float | None = 0.0
+    is_active: bool | None = True
 
 
 class MedicationCreate(MedicationBase):
@@ -20,9 +20,9 @@ class MedicationCreate(MedicationBase):
 
 
 class MedicationUpdate(MedicationBase):
-    name: Optional[str] = None
-    pzn: Optional[str] = None
-    price: Optional[float] = None
+    name: str | None = None
+    pzn: str | None = None
+    price: float | None = None
 
 
 class MedicationInDBBase(MedicationBase):

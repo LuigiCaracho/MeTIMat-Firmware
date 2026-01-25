@@ -12,13 +12,12 @@ from gui_parts.constants import (
     gui_signals,
 )
 from gui_parts.widgets import WaveWidget
-from PyQt6.QtCore import QSize, Qt, QTimer
-from PyQt6.QtGui import QColor, QFont, QImage, QPixmap
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QColor, QFont, QPixmap
 from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtWidgets import (
     QApplication,
     QFrame,
-    QHBoxLayout,
     QHeaderView,
     QLabel,
     QMainWindow,
@@ -82,7 +81,7 @@ class MachineGUI(QMainWindow):
 
         # Close Button (Top Right)
         self.close_btn = QPushButton("✕", self.central_widget)
-        self.close_btn.setStyleSheet(f"""
+        self.close_btn.setStyleSheet("""
             QPushButton {{
                 background: transparent; color: rgba(248, 250, 252, 0.3); font-size: 32px; border-radius: 30px;
             }}
@@ -278,7 +277,7 @@ class MachineGUI(QMainWindow):
 
 def run_gui_app():
     app = QApplication(sys.argv)
-    window = MachineGUI(gui_signals)
+    _ = MachineGUI(gui_signals)
     sys.exit(app.exec())
 
 

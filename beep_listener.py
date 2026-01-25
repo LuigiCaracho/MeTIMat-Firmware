@@ -27,7 +27,7 @@ def play_beep():
         logging.info("🔊 Playing beep...")
         logging.info(" ".join(["ffplay", "-nodisp", "-autoexit", SOUND_PATH]))
         # -nodisp: no video, -autoexit: exit when done, -loglevel quiet: no logs
-        subprocess.Popen(["ffplay", "-nodisp", "-autoexit", SOUND_PATH])
+        _ = subprocess.Popen(["ffplay", "-nodisp", "-autoexit", SOUND_PATH])
     except Exception as e:
         logging.error(f"Failed to play sound: {e}")
 
@@ -48,7 +48,7 @@ def main():
 
     try:
         while True:
-            data, addr = sock.recvfrom(1024)  # buffer size is 1024 bytes
+            data, _ = sock.recvfrom(1024)  # buffer size is 1024 bytes
             message = data.decode("utf-8").strip()
 
             if message == "BEEP":

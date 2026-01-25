@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
 
 import uvicorn
-from config import API_LISTEN_HOST, API_LISTEN_PORT, API_URL, MACHINE_ACCESS_TOKEN
-from fastapi import Depends, FastAPI, Header, HTTPException
+from config import API_LISTEN_HOST, API_LISTEN_PORT, MACHINE_ACCESS_TOKEN
+from fastapi import FastAPI, Header
 from pydantic import BaseModel
 from schemas.location import Location
 
@@ -21,15 +20,15 @@ class ScanRequest(BaseModel):
 
 class ValidationResponse(BaseModel):
     valid: bool
-    order: Optional[Order] = None
+    order: Order | None = None
     message: str
-    location_id: Optional[int] = None
+    location_id: int | None = None
 
 
 @app.post("/api/v1/orders/validate-qr", response_model=ValidationResponse)
 async def validate_qr(
     request: ScanRequest,
-    x_machine_token: Optional[str] = Header(None, alias="X-Machine-Token"),
+    x_machine_token: str | None = Header(None, alias="X-Machine-Token"),
 ):
     """
     Validates a QR code using the machine access token and returns order details.

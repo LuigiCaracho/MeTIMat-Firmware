@@ -5,10 +5,6 @@ from typing import Any, List, Tuple
 from rpi_ws281x import Color, PixelStrip
 
 from .constants import (
-    COLOR_LOGO_BLUE,
-    COLOR_LOGO_TURQUOISE,
-    COLOR_WHITE,
-    COLOR_YELLOW,
     LED_COUNT,
     STRIP_PARAMETERS,
 )

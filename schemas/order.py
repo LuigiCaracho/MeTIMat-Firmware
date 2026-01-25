@@ -1,27 +1,32 @@
 from datetime import datetime
-from typing import List, Optional
 
 from pydantic import BaseModel
 
+from .location import Location
+from .medication import Medication
 from .prescription import Prescription
 
 
 class OrderBase(BaseModel):
-    status: Optional[str] = "pending"
+    status: str | None = "pending"
 
 
 class OrderCreate(OrderBase):
-    prescription_ids: Optional[List[int]] = None
+    location_id: int | None = None
+    prescription_ids: list[int] | None = None
+    medication_ids: list[int] | None = None
 
 
 class OrderUpdate(OrderBase):
-    status: Optional[str] = None
+    status: str | None = None
 
 
 class OrderInDBBase(OrderBase):
     id: int
     user_id: int
-    access_token: Optional[str] = None
+    location_id: int | None = None
+    access_token: str | None = None
+    total_price: float = 0.0
     created_at: datetime
     updated_at: datetime
 
@@ -29,5 +34,26 @@ class OrderInDBBase(OrderBase):
         from_attributes = True
 
 
+class OrderMedicationSchema(BaseModel):
+    medication: Medication
+    quantity: int
+
+    class Config:
+        from_attributes = True
+
+
 class Order(OrderInDBBase):
-    prescriptions: List[Prescription] = []
+    prescriptions: list[Prescription] = []
+    medication_items: list[OrderMedicationSchema] = []
+    medications: list[Medication] = []
+    location: Location | None = None
+
+
+class QRScanRequest(BaseModel):
+    qr_data: str
+
+
+class QRValidationResponse(BaseModel):
+    valid: bool
+    order: Order | None = None
+    message: str

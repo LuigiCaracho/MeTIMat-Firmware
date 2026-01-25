@@ -11,7 +11,7 @@ example_path = base_path / "env.example"
 
 # Automatically create .env from env.example if it doesn't exist
 if not env_path.exists() and example_path.exists():
-    shutil.copy(example_path, env_path)
+    _ = shutil.copy(example_path, env_path)
     print(f"Created {env_path} from {example_path}")
 
 # Load environment variables from .env file
